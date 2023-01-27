@@ -1,0 +1,12 @@
+{
+  "files": {
+    "main.js": "/fiso-randomizer/static/js/main.be7e99fc.js",
+    "static/js/787.30dbe271.chunk.js": "/fiso-randomizer/static/js/787.30dbe271.chunk.js",
+    "index.html": "/fiso-randomizer/index.html",
+    "main.be7e99fc.js.map": "/fiso-randomizer/static/js/main.be7e99fc.js.map",
+    "787.30dbe271.chunk.js.map": "/fiso-randomizer/static/js/787.30dbe271.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/js/main.be7e99fc.js"
+  ]
+}
