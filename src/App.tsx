@@ -33,6 +33,7 @@ function App() {
   };
 
   const refreshResultsAsync = async () => {
+    if(currentBlockHeight < TARGET_BLOCK) return;
     const blockNumber = TARGET_BLOCK + (TARGET_BLOCK_INTERVAL * CHOSEN_POOLS.length);
     try {
       const blockRequest = await fetch(`https://cardano-mainnet.blockfrost.io/api/v0/blocks/${blockNumber}`, {
@@ -77,7 +78,7 @@ function App() {
   // Update everything every second
   setInterval(() => {
     setCurrentDateTimeString(new Date().toUTCString());
-  }, 1000);
+  }, 2000);
 
   return (
     <div className="App bg-main bg-cover bg-center w-[100vw] h-[100vh] pb-6">
@@ -88,7 +89,8 @@ function App() {
           <h2 className="text-[#66A7F2] lg:text-[25px] text-[15px] font-bold">Latest Cardano Block: <b className="text-white">{currentBlockHeight}</b></h2>
         </header>
         <section className="font-medium text-white text-[22px] mt-6">
-          <h4>Pools will be chosen based the on block hash as a random seed starting at block: <b>{TARGET_BLOCK}</b>.</h4>
+          <h4>Pools will be selected using the block hash as a random seed, starting at block <b>{TARGET_BLOCK}</b>. <br /> One pool will be selected per 180 blocks (1 hour) until all 25 stake pools are selected. <br /> <br /> 
+          <span className="text-gray-300 text-[15px]">The selection process will be based on a cyclic division of the block hash using the modulo operator. The resulting number will be used to index into an array of qualified pools, which is ordered based on their pool id (which is a hash) and sorted. This ensures that the selection of pools is random and unbiased, and provides a way to periodically update the set of chosen pools. Furthermore, by ordering the pools based on their pool id, it ensures that there is a deterministic ordering of the pools, which can be useful for debugging or auditing purposes. In case a block hash results in a number that maps to a pool that has already been chosen, the block will be skipped, and the next block will be used based on the predetermined interval. This will ensure that the final set of chosen pools is unique, and no pool is chosen more than once.</span></h4>
           <Paper elevation={2} sx={{ backgroundColor: "#294F72", color: "#FFF" }} className="mt-8 !rounded-lg py-4 px-6">
             <div className="flex">
               <div>
