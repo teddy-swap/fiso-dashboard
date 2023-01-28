@@ -50,7 +50,7 @@ function App() {
         // Map blockhash to pool number
         if (typeof blockResponse.hash === "string") {
           var bn = BigInt('0x' + blockResponse.hash);
-          const chosenPool = QUALIFIED_POOLS.at(Number(bn % 103n) - 1) as Pool;
+          const chosenPool = QUALIFIED_POOLS.at(Number(bn % 102n)) as Pool;
 
           if (CHOSEN_POOLS.filter(p => !p.invalid).indexOf(chosenPool) !== -1) {
             CHOSEN_POOLS.push({ ticker: "", id: "", invalid: true });
@@ -59,7 +59,7 @@ function App() {
             chosenPool.choosenBlockNo = blockNumber;
 
             if (CHOSEN_POOLS.indexOf(chosenPool) === -1 && CHOSEN_POOLS.filter(p => !p.invalid).length < 25) {
-              console.log(Number(bn % 103n), chosenPool);
+              console.log(Number(bn % 102n), chosenPool);
               CHOSEN_POOLS.push(chosenPool);
             }
           }
