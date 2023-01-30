@@ -6,6 +6,7 @@ import JSConfetti from 'js-confetti';
 
 const jsConfetti = new JSConfetti();
 let isFirstLoad = true;
+let callback: () => void | null;
 type Block = {
   block_height: number
   hash: string
@@ -17,11 +18,16 @@ const TARGET_BLOCK = 8336640;
 const TARGET_BLOCK_INTERVAL = 180;
 const CHOSEN_POOLS: Pool[] = [];
 
+setInterval(() => {
+  if (callback != null)
+    callback();
+}, 20000);
+
 function App() {
 
   sortPoolsById();
   const [currentBlockHeight, setCurrentBlockHeight] = useState<number>(0);
-  const [currentDateTimeString, setCurrentDateTimeString] = useState<string>(new Date().toUTCString());
+  const [currentDateTimeString, setCurrentDateTimeString] = useState<string>();
   const [choosenPools, setChoosenPools] = useState<Pool[]>(CHOSEN_POOLS);
 
   const refreshBlockAsync = async () => {
@@ -75,14 +81,15 @@ function App() {
     refreshResultsAsync();
   }, [currentBlockHeight]);
 
-  setInterval(() => {
-    setCurrentDateTimeString(new Date().toUTCString());
-  }, 40000);
-
   const nextResultBlock = TARGET_BLOCK + (TARGET_BLOCK_INTERVAL * CHOSEN_POOLS.length);
   const blocksRemaining = nextResultBlock - currentBlockHeight;
   const secondsRemaining = blocksRemaining * 20;
   const timeRemaining = moment().add(secondsRemaining, "seconds").fromNow();
+
+  callback = () => {
+    setCurrentDateTimeString(new Date().toString());
+  }
+
   return (
     <div className="App bg-main bg-cover bg-center w-[100vw] h-[100vh] pb-6">
       <main className="container mx-auto">
