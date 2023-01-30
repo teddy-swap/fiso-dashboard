@@ -83,7 +83,6 @@ function App() {
   const blocksRemaining = nextResultBlock - currentBlockHeight;
   const secondsRemaining = blocksRemaining * 20;
   const timeRemaining = moment().add(secondsRemaining, "seconds").fromNow();
-  console.log(timeRemaining);
   return (
     <div className="App bg-main bg-cover bg-center w-[100vw] h-[100vh] pb-6">
       <main className="container mx-auto">
