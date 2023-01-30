@@ -2,7 +2,10 @@ import { Avatar, Paper } from '@mui/material';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { Pool, QUALIFIED_POOLS, sortedByIdPools as sortPoolsById } from './Pools';
+import JSConfetti from 'js-confetti';
 
+const jsConfetti = new JSConfetti();
+let isFirstLoad = true;
 type Block = {
   block_height: number
   hash: string
@@ -17,7 +20,6 @@ const CHOSEN_POOLS: Pool[] = [];
 function App() {
 
   sortPoolsById();
-
   const [currentBlockHeight, setCurrentBlockHeight] = useState<number>(0);
   const [currentDateTimeString, setCurrentDateTimeString] = useState<string>(new Date().toUTCString());
   const [choosenPools, setChoosenPools] = useState<Pool[]>(CHOSEN_POOLS);
@@ -55,6 +57,8 @@ function App() {
             if (CHOSEN_POOLS.indexOf(chosenPool) === -1 && CHOSEN_POOLS.filter(p => !p.invalid).length < 25) {
               console.log(Number(bn % 102n), chosenPool);
               CHOSEN_POOLS.push(chosenPool);
+              if (!isFirstLoad)
+                jsConfetti.addConfetti();
             }
           }
 
@@ -66,6 +70,7 @@ function App() {
         console.log(`Error processing ${blockNumber}`, ex);
       }
       setChoosenPools(CHOSEN_POOLS.filter(p => p));
+      isFirstLoad = false;
     };
     refreshResultsAsync();
   }, [currentBlockHeight]);
