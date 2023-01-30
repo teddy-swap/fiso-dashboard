@@ -2,9 +2,8 @@ import { Avatar, Paper } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { Pool, QUALIFIED_POOLS, sortedByIdPools as sortPoolsById } from './Pools';
 
-const BLOCKFROST_PROJECT_ID = "mainnetP3r1osidROSxcW9Vas1ywFiRiRkMcDyj";
 type Block = {
-  height: number
+  block_height: number
   hash: string
   status: number
 }
@@ -23,13 +22,10 @@ function App() {
   const [choosenPools, setChoosenPools] = useState<Pool[]>(CHOSEN_POOLS);
 
   const refreshBlockAsync = async () => {
-    const blockRequest = await fetch("https://cardano-mainnet.blockfrost.io/api/v0/blocks/latest", {
-      headers: {
-        project_id: BLOCKFROST_PROJECT_ID
-      } as any
-    });
-    const blockResponse: Block = await blockRequest.json();
-    setCurrentBlockHeight(blockResponse.height);
+    const blockRequest = await fetch("https://api.koios.rest/api/v0/blocks?offset=0&limit=1");
+    const blockResponse: Block[] = await blockRequest.json();
+    if(blockResponse.length > 0)
+      setCurrentBlockHeight(blockResponse[0].block_height);
   };
 
   useEffect(() => {
@@ -41,12 +37,9 @@ function App() {
       const blockNumber = TARGET_BLOCK + (TARGET_BLOCK_INTERVAL * CHOSEN_POOLS.length);
       if (currentBlockHeight < blockNumber) return;
       try {
-        const blockRequest = await fetch(`https://cardano-mainnet.blockfrost.io/api/v0/blocks/${blockNumber}`, {
-          headers: {
-            project_id: BLOCKFROST_PROJECT_ID
-          } as any
-        });
-        const blockResponse: Block = await blockRequest.json();
+        const blockRequest = await fetch(`https://api.koios.rest/api/v0/blocks?block_height=eq.${blockNumber}`);
+        const blocksResponse: Block[] = await blockRequest.json();
+        const blockResponse: Block = blocksResponse[0];
         // Map blockhash to pool number
         if (typeof blockResponse.hash === "string") {
           var bn = BigInt('0x' + blockResponse.hash);
@@ -76,10 +69,9 @@ function App() {
     refreshResultsAsync();
   }, [currentBlockHeight]);
 
-  // Update everything every second
   setInterval(() => {
     setCurrentDateTimeString(new Date().toUTCString());
-  }, 20000);
+  }, 40000);
 
   return (
     <div className="App bg-main bg-cover bg-center w-[100vw] h-[100vh] pb-6">
