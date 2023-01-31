@@ -3,6 +3,7 @@ import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { Pool, QUALIFIED_POOLS, sortedByIdPools as sortPoolsById } from './Pools';
 import JSConfetti from 'js-confetti';
+import { Loop } from '@mui/icons-material';
 
 const jsConfetti = new JSConfetti();
 let isFirstLoad = true;
@@ -21,7 +22,7 @@ const CHOSEN_POOLS: Pool[] = [];
 setInterval(() => {
   if (callback != null)
     callback();
-}, 20000);
+}, 40000);
 
 function App() {
 
@@ -123,6 +124,11 @@ function App() {
                 </div>
               </div>
             </div>
+            {isFirstLoad && (
+              <div>
+                <Loop className="animate-spin" />
+              </div>)
+            }
             <div className="grid lg:grid-cols-7 md:grid-cols-4 grid-cols-2 mt-4 mb-4 gap-4">
               {choosenPools.filter(p => !p.invalid).slice(0, 10).map((pool, i) => {
                 return <Paper className="grid grid-cols-2 content-center h-[50px] !bg-teddy-active !rounded-lg p-2 text-[12px] text-center" key={i}>
