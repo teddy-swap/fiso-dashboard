@@ -5,6 +5,7 @@ export type Pool = {
     choosenBlockNo?: number
     invalid?: boolean
     idBech32?: string
+    homepage?: string
 };
 
 export const sortedByIdPools = () => {
