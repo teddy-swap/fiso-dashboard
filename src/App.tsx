@@ -277,11 +277,7 @@ function App() {
     };
 
     const refreshStakeDataAsync = async () => {
-      const fisoDataRequest = await fetch(`https://teddyswap.cardano-blockhouse.de/api/getPoolsStake`, {
-        headers: {
-          Authorization: "Bearer 1|aoqTmEKofncNX09zyo9mfnLtXBCfc5Nx9Lw1lmnm"
-        }
-      });
+      const fisoDataRequest = await fetch(`https://teddy-fiso-api.azurewebsites.net/api/teddy_fiso_api`);
       const fisoDataResponse: BlockHouseResponse = await fisoDataRequest.json();
       setFisoData(fisoDataResponse);
     };
