@@ -1,5 +1,5 @@
 import { Alert, Avatar, Badge, Button, Card, CardContent, Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Paper, Snackbar, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Pool, QUALIFIED_POOLS, sortedByIdPools as sortPoolsById } from './Pools';
 import JSConfetti from 'js-confetti';
 import { Close, ConfirmationNumber, Info, Loop, Wallet, WalletTwoTone, WallpaperTwoTone } from '@mui/icons-material';
@@ -286,7 +286,24 @@ function App() {
     // refreshResultsAsync();
   }, [currentBlockHeight]);
 
-  const fisoDataByPoolTicker = (ticker: string) => fisoData?.pooldata.filter(v => v.ticker === ticker)?.at(0);
+  const fisoDataByPoolTicker = useCallback((ticker: string) => fisoData?.pooldata.filter(v => v.ticker === ticker)?.at(0), [fisoData]);
+
+  useEffect(() => {
+    choosenPools.sort((a, b) => {
+      const aData = fisoDataByPoolTicker(a.ticker);
+      const bData = fisoDataByPoolTicker(b.ticker);
+      if (aData === undefined || bData === undefined) return 0;
+      if (parseFloat(aData.live_stake.replaceAll(",", "")) === parseFloat(bData.live_stake.replaceAll(",", ""))) return 0;
+      if (parseFloat(aData.live_stake.replaceAll(",", "")) < parseFloat(bData.live_stake.replaceAll(",", "")))
+        return -1;
+      else
+        return 1;
+    });
+
+    setChoosenPools(choosenPools);
+
+  }, [choosenPools, fisoData, fisoDataByPoolTicker]);
+
   const isSmallestFisoPool = (ticker: string) => {
     return fisoData?.pooldata.sort((a, b) => {
       if (parseFloat(a.live_stake.replaceAll(",", "")) === parseFloat(b.live_stake.replaceAll(",", ""))) return 0;
