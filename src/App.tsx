@@ -593,7 +593,7 @@ function App() {
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
             <span className="text-white">
-              <h3>The FISO pools was be selected using the block hash as a random seed, the first block was choosen at block 8336640. One pool was selected per 180 blocks (1 hour) until all 25 stake pools were selected.</h3>
+              <h3>The FISO pools was selected using the block hash as a random seed, the first block was choosen at block 8336640. One pool was selected per 180 blocks (1 hour) until all 25 stake pools were selected.</h3>
               <br />
               <span>The selection process was be based on a cyclic division of the block hash using the modulo operator. The resulting number was be used to index into an array of qualified pools, which is ordered based on their pool id (which is a hash) and sorted. This ensures that the selection of pools was random and unbiased, and provides a way to periodically update the set of chosen pools. Furthermore, by ordering the pools based on their pool id, it ensures that there is a deterministic ordering of the pools, which can be useful for debugging or auditing purposes. In case a block hash results in a number that maps to a pool that has already been chosen, the block was skipped, and the next block was used, based on the predetermined interval. This ensured that the final set of chosen pools was unique, and no pool is chosen more than once.</span>
             </span>
