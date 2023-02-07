@@ -5,7 +5,7 @@ module.exports = {
     extend: {
       colors: {
         'teddy-active': "#46B58D",
-        'teddy-reserved': "#66A7F2",
+        'teddy-smallest': "#f44336",
         'teddy-inactive': "rgba(255,255,255,0.62)"
       },
       backgroundImage: {

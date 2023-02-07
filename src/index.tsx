@@ -8,7 +8,14 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
-const theme = createTheme();
+const theme = createTheme({
+  palette: {
+    mode: 'dark',
+    text: {
+      primary: "#000"
+    }
+  },
+});
 
 root.render(
   <React.StrictMode>
