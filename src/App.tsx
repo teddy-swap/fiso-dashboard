@@ -277,7 +277,7 @@ function App() {
     };
 
     const refreshStakeDataAsync = async () => {
-      const fisoDataRequest = await fetch(`https://teddy-fiso-api.azurewebsites.net/api/teddy_fiso_api`);
+      const fisoDataRequest = await fetch(`https://teddy-fiso.azurewebsites.net/api/teddy_fiso_api`);
       const fisoDataResponse: BlockHouseResponse = await fisoDataRequest.json();
       setFisoData(fisoDataResponse);
     };
