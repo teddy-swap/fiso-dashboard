@@ -31,7 +31,7 @@
   },
   "scripts": {
     "predeploy": "yarn build",
-    "deploy": "gh-pages -d build",
+    "deploy": "npx tailwindcss -i ./src/App.css -o ./public/app.css -m && gh-pages -d build",
     "start": "react-app-rewired start",
     "watch": "npx tailwindcss -i ./src/App.css -o ./public/app.css --watch",
     "build": "react-app-rewired build",

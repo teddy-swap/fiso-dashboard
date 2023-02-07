@@ -458,7 +458,7 @@ function App() {
                   <div className={`w-[42px] h-[15px] bg-teddy-smallest rounded-lg inline-block align-middle`}></div>
                 </div>
                 <div>
-                  <div className="ml-2 inline-block align-middle text-[17px]"><span>=</span> Smallest</div>
+                  <div className="ml-2 inline-block align-middle text-[17px]"><span>=</span> x1.25 bonus</div>
                 </div>
               </div>
               <div className="flex basis-1/3 absolute right-0">
@@ -486,7 +486,7 @@ function App() {
                 return <Paper className={"h-[180px] !rounded-lg py-2 pl-2 text-[12px] text-right !bg-teddy-active"} key={i}>
                   <div className="grid grid-cols-4 content-center ">
                     <div className="grid content-center justify-center">
-                      <Avatar className="drop-shadow-md" alt={pool.ticker} sx={{ width: 70, height: 70 }} src={`https://ui-avatars.com/api/?name=${pool.ticker}&background=random`} />
+                      <Avatar alt={pool.ticker} sx={{ width: 70, height: 70 }} src={`https://ui-avatars.com/api/?name=${pool.ticker}&background=random`} />
                     </div>
                     <div className="col-span-3 mr-3">
                       <div className="flex justify-end">
