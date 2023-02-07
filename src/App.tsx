@@ -375,7 +375,7 @@ function App() {
           <div className="md:absolute md:right-0 md:top-5 static">
             {currentWalletApi === undefined && <Button startIcon={<WalletTwoTone />} onClick={onConnectWalletShow}>Connect Wallet</Button>}
             {currentWalletApi !== undefined && currentAddress !== undefined &&
-              <Chip className="!text-white" avatar={<Avatar src={currentWallet?.icon} />} label={currentAddress?.substring(0, 8) + "..." + currentAddress?.substring(currentAddress?.length - 6)} onClick={() => setCurrentWalletApi(undefined)} />}
+              <Chip className="!text-white" avatar={<Avatar src={currentWallet?.icon} />} label={currentAddress?.substring(0, 10) + "..." + currentAddress?.substring(currentAddress?.length - 6)} onClick={() => setCurrentWalletApi(undefined)} />}
             {currentWalletApi !== undefined && currentAddress === undefined &&
               <Chip className="!text-white" avatar={<Loop className="animate-spin" />} label={"loading..."} />}
           </div>
