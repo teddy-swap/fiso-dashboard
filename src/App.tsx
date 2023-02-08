@@ -374,24 +374,20 @@ function App() {
       try {
         const rewardAddress = await lucid?.wallet.rewardAddress();
         let tx = lucid?.newTx();
+        
+        const accInfoReq = fetch(
+          "https://api.koios.rest/api/v0/account_info",
+          {
+            headers: { "content-type": "application/json" },
+            method: "POST", body: JSON.stringify({ _stake_addresses: [rewardAddress] })
+          });
+        const accInfo = await (await accInfoReq).json();
 
-        if (currentPoolId != null) {
-          const accInfoReq = fetch(
-            "https://api.koios.rest/api/v0/account_info",
-            {
-              headers: { "content-type": "application/json" },
-              method: "POST", body: JSON.stringify({ _stake_addresses: [rewardAddress] })
-            });
-          const accInfo = await (await accInfoReq).json();
-          const withdrawAmount = BigInt(accInfo[0]["rewards_available"].toString());
-          tx = tx.deregisterStake(rewardAddress!);
-
-          if (withdrawAmount > 0n) {
-            tx = tx.withdraw(rewardAddress!, withdrawAmount)
-          }
+        if (accInfo[0].status !== "registered") {
+          tx = tx.registerStake(rewardAddress!).addSigner(rewardAddress!);
         }
 
-        const txHash = await (await (await tx.registerStake(rewardAddress!).delegateTo(rewardAddress!, pool.idBech32!).addSigner(rewardAddress!).payToAddress(currentAddress!, { "lovelace": 1000000n }).complete())?.sign().complete())?.submit();
+        const txHash = await (await (await tx.delegateTo(rewardAddress!, pool.idBech32!).complete())?.sign().complete())?.submit();
         setShowStakeSuccess(true);
         await lucid?.awaitTx(txHash);
         setCurrentPoolid((await lucid.wallet.getDelegation()).poolId);
