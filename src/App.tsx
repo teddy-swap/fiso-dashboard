@@ -361,12 +361,25 @@ function App() {
     const api = await (window as any).cardano[wallet.id].enable();
     lucid.selectWallet(api);
 
+    const rewardAddress = await lucid?.wallet.rewardAddress();
+
     setLucid(lucid);
     setCurrentWalletApi(api);
     setCurrentWallet(wallet);
     setShowConnectWallet(false);
     setCurrentAddress(await lucid.wallet.address());
-    setCurrentPoolid((await lucid.wallet.getDelegation()).poolId);
+    setCurrentPoolid((await getDelegationAsync(rewardAddress!))[0].delegated_pool);
+  }
+
+  const getDelegationAsync = async (rewardAddress: string) => {
+    const accInfoReq = fetch(
+      "https://api.koios.rest/api/v0/account_info",
+      {
+        headers: { "content-type": "application/json" },
+        method: "POST", body: JSON.stringify({ _stake_addresses: [rewardAddress] })
+      });
+    const accInfo = await (await accInfoReq).json();
+    return accInfo;
   }
 
   const onStake = async (pool: Pool) => {
@@ -374,7 +387,7 @@ function App() {
       try {
         const rewardAddress = await lucid?.wallet.rewardAddress();
         let tx = lucid?.newTx();
-        
+
         const accInfoReq = fetch(
           "https://api.koios.rest/api/v0/account_info",
           {
@@ -390,7 +403,7 @@ function App() {
         const txHash = await (await (await tx.delegateTo(rewardAddress!, pool.idBech32!).complete())?.sign().complete())?.submit();
         setShowStakeSuccess(true);
         await lucid?.awaitTx(txHash);
-        setCurrentPoolid((await lucid.wallet.getDelegation()).poolId);
+        setCurrentPoolid((await getDelegationAsync(rewardAddress!))[0].delegated_pool);
       } catch (ex: any) {
         setShowRegisterStake(false);
         setTxError(ex.toString());
