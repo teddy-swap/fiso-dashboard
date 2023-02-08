@@ -344,10 +344,23 @@ function App() {
   const onStake = async (pool: Pool) => {
     if (lucid !== undefined) {
       const rewardAddress = await lucid?.wallet.rewardAddress();
+      console.log(rewardAddress);
+      const deregisterHash = await (await (await lucid.newTx().deregisterStake(rewardAddress!).complete({
+        coinSelection: true
+      })).sign().complete()).submit();
+      console.log("deregister", deregisterHash)
+      await lucid.awaitTx(deregisterHash);
+
+      if (currentPoolId == null && rewardAddress != null) {
+        const txHash = await (await (await lucid.newTx().registerStake(rewardAddress).complete()).sign().complete()).submit();
+        await lucid?.awaitTx(txHash);
+      }
+
       const txHash = await (await (await lucid?.newTx().delegateTo(rewardAddress as string, pool.idBech32 as string).complete())?.sign().complete())?.submit();
       setShowStakeSuccess(true);
       await lucid?.awaitTx(txHash);
       setCurrentPoolid((await lucid.wallet.getDelegation()).poolId);
+
     } else {
       setShowWalletError(true);
     }
