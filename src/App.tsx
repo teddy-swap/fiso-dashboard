@@ -251,6 +251,9 @@ function App() {
   const [showWalletError, setShowWalletError] = useState<boolean>(false);
   const [currentPoolId, setCurrentPoolid] = useState<string | null>(null);
   const [showStakeSuccess, setShowStakeSuccess] = useState<boolean>(false);
+  const [showRegisterStake, setShowRegisterStake] = useState<boolean>(false);
+  const [showTxError, setShowTxError] = useState<boolean>(false);
+  const [txError, setTxError] = useState<string>("");
 
   const refreshBlockAsync = async () => {
     const blockRequest = await fetch("https://api.koios.rest/api/v0/blocks?offset=0&limit=1");
@@ -368,23 +371,25 @@ function App() {
 
   const onStake = async (pool: Pool) => {
     if (lucid !== undefined) {
-      const rewardAddress = await lucid?.wallet.rewardAddress();
-      console.log(rewardAddress);
-      const deregisterHash = await (await (await lucid.newTx().deregisterStake(rewardAddress!).complete({
-        coinSelection: true
-      })).sign().complete()).submit();
-      console.log("deregister", deregisterHash)
-      await lucid.awaitTx(deregisterHash);
+      try {
+        const rewardAddress = await lucid?.wallet.rewardAddress();
 
-      if (currentPoolId == null && rewardAddress != null) {
-        const txHash = await (await (await lucid.newTx().registerStake(rewardAddress).complete()).sign().complete()).submit();
+        if (currentPoolId == null && rewardAddress != null) {
+          setShowRegisterStake(true);
+          const txHash = await (await (await lucid?.newTx().registerStake(rewardAddress).addSigner(rewardAddress).complete()).sign().complete()).submit();
+          await lucid?.awaitTx(txHash);
+        }
+
+        const txHash = await (await (await lucid?.newTx().delegateTo(rewardAddress as string, pool.idBech32 as string).complete())?.sign().complete())?.submit();
+        setShowRegisterStake(false);
+        setShowStakeSuccess(true);
         await lucid?.awaitTx(txHash);
+        setCurrentPoolid((await lucid.wallet.getDelegation()).poolId);
+      } catch (ex: any) {
+        setShowRegisterStake(false);
+        setTxError(ex.toString());
+        setShowTxError(true);
       }
-
-      const txHash = await (await (await lucid?.newTx().delegateTo(rewardAddress as string, pool.idBech32 as string).complete())?.sign().complete())?.submit();
-      setShowStakeSuccess(true);
-      await lucid?.awaitTx(txHash);
-      setCurrentPoolid((await lucid.wallet.getDelegation()).poolId);
 
     } else {
       setShowWalletError(true);
@@ -688,9 +693,19 @@ function App() {
           Please connect your wallet first!
         </Alert>
       </Snackbar>
+      <Snackbar open={showTxError} autoHideDuration={6000} onClose={() => setShowTxError(false)}>
+        <Alert onClose={() => setShowTxError(false)} severity="error" sx={{ width: '100%' }}>
+          Something went wrong, please try again. {txError}
+        </Alert>
+      </Snackbar>
       <Snackbar open={showStakeSuccess} autoHideDuration={6000} onClose={() => setShowStakeSuccess(false)}>
         <Alert onClose={() => setShowStakeSuccess(false)} severity="success" sx={{ width: '100%' }}>
           Congratulations, you are now staked to a TeddySwap FISO Pool 🎊, Please note that it will take a few seconds for this to be reflected!
+        </Alert>
+      </Snackbar>
+      <Snackbar open={showRegisterStake}>
+        <Alert severity="success" sx={{ width: '100%' }}>
+          Processing registering your stake address for the first time, Please wait...
         </Alert>
       </Snackbar>
       <footer className="flex content-center justify-center text-center text-white w-full mt-6 md:flex-row flex-col">
