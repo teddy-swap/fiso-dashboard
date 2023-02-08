@@ -373,7 +373,13 @@ function App() {
     if (lucid !== undefined) {
       try {
         const rewardAddress = await lucid?.wallet.rewardAddress();
-        const txHash = await (await (await lucid?.newTx().deregisterStake(rewardAddress!).registerStake(rewardAddress!).addSigner(rewardAddress!).delegateTo(rewardAddress!, pool.idBech32!).complete())?.sign().complete())?.submit();
+        let tx = lucid?.newTx();
+
+        if (currentPoolId != null) {
+          tx = tx.deregisterStake(rewardAddress!);
+        }
+        
+        const txHash = await (await (await tx.registerStake(rewardAddress!).delegateTo(rewardAddress!, pool.idBech32!).addSigner(rewardAddress!).complete())?.sign().complete())?.submit();
         setShowStakeSuccess(true);
         await lucid?.awaitTx(txHash);
         setCurrentPoolid((await lucid.wallet.getDelegation()).poolId);
