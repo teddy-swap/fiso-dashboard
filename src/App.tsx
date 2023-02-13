@@ -561,7 +561,7 @@ function App() {
           </div>
 
           <div className={`grid grid-cols-1 md:grid-cols-3 font-medium text-white text-[22px] mt-6 md:gap-4 gap-2 ${mainTabValue !== 1 ? "hidden" : "visible"}`}>
-            {rewardAddress !== undefined &&
+            {rewardAddress !== undefined && rewardData !== undefined &&
               <>
                 <Card sx={{ backgroundColor: "#294F72", color: "#FFF", height: "200px" }} className="!rounded-lg py-4 px-6">
                   <CardContent>
@@ -612,7 +612,7 @@ function App() {
                 </Card>
               </>
             }
-            {rewardAddress === undefined &&
+            {(rewardAddress === undefined || rewardData === undefined) &&
               <>
                 <Card sx={{ backgroundColor: "#294F72", color: "#FFF", height: "200px" }} className="!rounded-lg py-1 px-6 col-start-1 md:col-start-2">
                   <h4 className="mt-1">Check your rewards!</h4>
