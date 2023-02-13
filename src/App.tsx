@@ -1,8 +1,8 @@
-import { Alert, Avatar, Badge, Button, Card, CardContent, Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Paper, Snackbar, Typography } from '@mui/material';
+import { Alert, Avatar, Badge, Button, Card, CardContent, Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Paper, Snackbar, Tab, Tabs, TextField, Typography } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { Pool, QUALIFIED_POOLS, sortedByIdPools as sortPoolsById } from './Pools';
 import JSConfetti from 'js-confetti';
-import { Close, ConfirmationNumber, Info, Loop, Wallet, WalletTwoTone, WallpaperTwoTone } from '@mui/icons-material';
+import { Close, ConfirmationNumber, Info, Loop, Wallet, WalletTwoTone } from '@mui/icons-material';
 import { Blockfrost, Lucid } from 'lucid-cardano';
 
 const jsConfetti = new JSConfetti();
@@ -46,6 +46,17 @@ type Wallet = {
   icon: string;
   name: string;
   id: string;
+}
+
+type BlockHouseRewardData = {
+  status: string,
+  currentTedyToken: string,
+  currentScorePoints: string,
+  currentStake: number,
+  totalScorePoints: string,
+  hasSmallPoolBonus: number,
+  delegatedToPool: string,
+  delegatedSinceEpoch: number
 }
 
 const TARGET_BLOCK = 8336640;
@@ -254,6 +265,10 @@ function App() {
   const [showRegisterStake, setShowRegisterStake] = useState<boolean>(false);
   const [showTxError, setShowTxError] = useState<boolean>(false);
   const [txError, setTxError] = useState<string>("");
+  const [mainTabValue, setMainTabValue] = useState<number>(0);
+  const [rewardData, setRewardData] = useState<BlockHouseRewardData>();
+  const [rewardAddress, setRewardAddress] = useState<string>();
+  const [rewardCheckPaymentAddress, setRewardCheckPaymentAddress] = useState<string>();
 
   const refreshBlockAsync = async () => {
     const blockRequest = await fetch("https://api.koios.rest/api/v0/blocks?offset=0&limit=1");
@@ -308,13 +323,38 @@ function App() {
       const fisoDataRequest = await fetch(`https://teddy-fiso.azurewebsites.net/api/teddy_fiso_api`);
       const fisoDataResponse: BlockHouseResponse = await fisoDataRequest.json();
       setFisoData(fisoDataResponse);
+
+      if (rewardAddress !== undefined) {
+        const fisoRewardDataRequest = await fetch(`https://teddy-fiso.azurewebsites.net/api/teddy_fiso_rewards_api?stakeAddress=${rewardAddress}`);
+        const fisoRewardData: BlockHouseRewardData = await fisoRewardDataRequest.json();
+        setRewardData(fisoRewardData);
+      }
+
     };
 
     refreshStakeDataAsync();
     // refreshResultsAsync();
-  }, [currentBlockHeight]);
+  }, [currentBlockHeight, rewardAddress]);
 
   const fisoDataByPoolTicker = useCallback((ticker: string) => fisoData?.pooldata.filter(v => v.ticker === ticker)?.at(0), [fisoData]);
+
+  useEffect(() => {
+    const run = async () => {
+      if (rewardCheckPaymentAddress !== undefined) {
+        const l = await Lucid.new(
+          new Blockfrost("https://cardano-mainnet.blockfrost.io/api/v0", "mainnetP3r1osidROSxcW9Vas1ywFiRiRkMcDyj"),
+          "Mainnet",
+        );
+        const stakingCreds = l.utils.getAddressDetails(rewardCheckPaymentAddress).stakeCredential;
+        if (stakingCreds !== undefined) {
+          setRewardAddress(l.utils.credentialToRewardAddress(stakingCreds));
+        }
+      }
+    }
+
+    run();
+
+  }, [rewardCheckPaymentAddress]);
 
   useEffect(() => {
     choosenPools.sort((a, b) => {
@@ -361,14 +401,15 @@ function App() {
     const api = await (window as any).cardano[wallet.id].enable();
     lucid.selectWallet(api);
 
-    const rewardAddress = await lucid?.wallet.rewardAddress();
+    const ra = await lucid?.wallet.rewardAddress();
+    setRewardAddress(ra!);
 
     setLucid(lucid);
     setCurrentWalletApi(api);
     setCurrentWallet(wallet);
     setShowConnectWallet(false);
     setCurrentAddress(await lucid.wallet.address());
-    setCurrentPoolid((await getDelegationAsync(rewardAddress!))[0].delegated_pool);
+    setCurrentPoolid((await getDelegationAsync(ra!))[0].delegated_pool);
   }
 
   const getDelegationAsync = async (rewardAddress: string) => {
@@ -450,68 +491,146 @@ function App() {
           <div className="md:absolute md:right-0 md:top-5 static">
             {currentWalletApi === undefined && <Button startIcon={<WalletTwoTone />} onClick={onConnectWalletShow}>Connect Wallet</Button>}
             {currentWalletApi !== undefined && currentAddress !== undefined &&
-              <Chip className="!text-white" avatar={<Avatar src={currentWallet?.icon} />} label={currentAddress?.substring(0, 10) + "..." + currentAddress?.substring(currentAddress?.length - 6)} onClick={() => setCurrentWalletApi(undefined)} />}
+              <Chip className="!text-white" avatar={<Avatar src={currentWallet?.icon} />} label={currentAddress?.substring(0, 10) + "..." + currentAddress?.substring(currentAddress?.length - 6)} onClick={() => { setCurrentWalletApi(undefined); setRewardAddress(undefined); setRewardCheckPaymentAddress(undefined); }} />}
             {currentWalletApi !== undefined && currentAddress === undefined &&
               <Chip className="!text-white" avatar={<Loop className="animate-spin" />} label={"loading..."} />}
           </div>
         </header>
-        <section className="grid grid-cols-1 md:grid-cols-3 font-medium text-white text-[22px] mt-6 md:gap-4 gap-2">
-          <Card sx={{ backgroundColor: "#294F72", color: "#FFF" }} className="!rounded-lg py-4 px-6">
-            <CardContent>
-              <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                Total Stake
-              </Typography>
-              <Typography variant="h5" component="div">
-                {fisoData?.fiso_stats.total_stake} ₳
-              </Typography>
-              <Typography sx={{ mb: 1.5 }} color="text.secondary">
-                All Time
-              </Typography>
-              <Typography variant="body2">
-                Total Growth Since
-                <br />
-                <b>{fisoData?.fiso_stats.total_growth_full} ₳</b>
-              </Typography>
-            </CardContent>
-          </Card>
+        <section className="">
+          <Tabs value={mainTabValue} onChange={(e, v) => setMainTabValue(v)} variant="fullWidth">
+            <Tab label="Stats" />
+            <Tab label="Rewards" />
+          </Tabs>
+          <div className={`grid grid-cols-1 md:grid-cols-3 font-medium text-white text-[22px] mt-6 md:gap-4 gap-2 ${mainTabValue !== 0 ? "hidden" : "visible"}`}>
+            <Card sx={{ backgroundColor: "#294F72", color: "#FFF", height: "200px" }} className="!rounded-lg py-4 px-6">
+              <CardContent>
+                <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                  Total Stake
+                </Typography>
+                <Typography variant="h5" component="div">
+                  {fisoData?.fiso_stats.total_stake} ₳
+                </Typography>
+                <Typography sx={{ mb: 1.5 }} color="text.secondary">
+                  All Time
+                </Typography>
+                <Typography variant="body2">
+                  Total Growth Since
+                  <br />
+                  <b>{fisoData?.fiso_stats.total_growth_full} ₳</b>
+                </Typography>
+              </CardContent>
+            </Card>
 
-          <Card sx={{ backgroundColor: "#294F72", color: "#FFF" }} className="!rounded-lg py-4 px-6">
-            <CardContent>
-              <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                Total Growth
-              </Typography>
-              <Typography variant="h5" component="div">
-                {fisoData?.fiso_stats.total_growth_last_day} ₳
-              </Typography>
-              <Typography sx={{ mb: 1.5 }} color="text.secondary">
-                last 24 hours
-              </Typography>
-              <Typography variant="body2">
-                Total Delegators
-                <br />
-                <b>{fisoData?.fiso_stats.total_delegators}</b>
-              </Typography>
-            </CardContent>
-          </Card>
+            <Card sx={{ backgroundColor: "#294F72", color: "#FFF", height: "200px" }} className="!rounded-lg py-4 px-6">
+              <CardContent>
+                <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                  Total Growth
+                </Typography>
+                <Typography variant="h5" component="div">
+                  {fisoData?.fiso_stats.total_growth_last_day} ₳
+                </Typography>
+                <Typography sx={{ mb: 1.5 }} color="text.secondary">
+                  last 24 hours
+                </Typography>
+                <Typography variant="body2">
+                  Total Delegators
+                  <br />
+                  <b>{fisoData?.fiso_stats.total_delegators}</b>
+                </Typography>
+              </CardContent>
+            </Card>
 
-          <Card sx={{ backgroundColor: "#294F72", color: "#FFF" }} className="!rounded-lg py-4 px-6">
-            <CardContent>
-              <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                Total Growth
-              </Typography>
-              <Typography variant="h5" component="div">
-                {fisoData?.fiso_stats.total_growth_last_hour} ₳
-              </Typography>
-              <Typography sx={{ mb: 1.5 }} color="text.secondary">
-                last 1 hour
-              </Typography>
-              <Typography variant="body2">
-                Total Growth Live
-                <br />
-                <b>{fisoData?.fiso_stats.total_growth_live} ₳</b>
-              </Typography>
-            </CardContent>
-          </Card>
+            <Card sx={{ backgroundColor: "#294F72", color: "#FFF", height: "200px" }} className="!rounded-lg py-4 px-6">
+              <CardContent>
+                <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                  Total Growth
+                </Typography>
+                <Typography variant="h5" component="div">
+                  {fisoData?.fiso_stats.total_growth_last_hour} ₳
+                </Typography>
+                <Typography sx={{ mb: 1.5 }} color="text.secondary">
+                  last 1 hour
+                </Typography>
+                <Typography variant="body2">
+                  Total Growth Live
+                  <br />
+                  <b>{fisoData?.fiso_stats.total_growth_live} ₳</b>
+                </Typography>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className={`grid grid-cols-1 md:grid-cols-3 font-medium text-white text-[22px] mt-6 md:gap-4 gap-2 ${mainTabValue !== 1 ? "hidden" : "visible"}`}>
+            {rewardAddress !== undefined &&
+              <>
+                <Card sx={{ backgroundColor: "#294F72", color: "#FFF", height: "200px" }} className="!rounded-lg py-4 px-6">
+                  <CardContent>
+                    <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                      Current Pool
+                    </Typography>
+                    <Typography variant="h5" component="div" gutterBottom>
+                      {rewardData?.delegatedToPool}
+                    </Typography>
+                    <Typography sx={{ mb: 1.5 }} color="text.secondary">
+                      Total Stake
+                      <br />
+                      <b>{rewardData?.currentStake} ₳</b>
+                    </Typography>
+                  </CardContent>
+                </Card>
+
+                <Card sx={{ backgroundColor: "#294F72", color: "#FFF", height: "200px" }} className="!rounded-lg py-4 px-6">
+                  <CardContent>
+                    <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                      My Score
+                    </Typography>
+                    <Typography variant="h5" component="div" gutterBottom>
+                      {rewardData?.currentScorePoints}
+                    </Typography>
+                    <Typography sx={{ mb: 1.5 }} color="text.secondary">
+                      Total Score
+                      <br />
+                      <b>{rewardData?.totalScorePoints}</b>
+                    </Typography>
+                  </CardContent>
+                </Card>
+
+                <Card sx={{ backgroundColor: "#294F72", color: "#FFF", height: "200px" }} className="!rounded-lg py-4 px-6">
+                  <CardContent>
+                    <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                      My Rewards
+                    </Typography>
+                    <Typography variant="h5" component="div" gutterBottom>
+                      {rewardData?.currentTedyToken} $TEDY
+                    </Typography>
+                    <Typography sx={{ mb: 1.5 }} color="text.secondary">
+                      Bonus Multiplier
+                      <br />
+                      <b>{rewardData?.hasSmallPoolBonus === 1 ? "x1.25 🔥" : "x0"} </b>
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </>
+            }
+            {rewardAddress === undefined &&
+              <>
+                <Card sx={{ backgroundColor: "#294F72", color: "#FFF", height: "200px" }} className="!rounded-lg py-1 px-6 col-start-1 md:col-start-2">
+                  <h4 className="mt-1">Check your rewards!</h4>
+                  <div className="mt-1 flex">
+                    <TextField InputProps={{ className: "!text-white" }} className="w-full" id="standard-basic" label="Enter your wallet address" variant="standard" value={rewardCheckPaymentAddress} onChange={(e) => setRewardCheckPaymentAddress(e.target.value)} />
+                  </div>
+                  <div className="my-2">OR</div>
+                  <Button startIcon={<WalletTwoTone />} onClick={onConnectWalletShow}>Connect Wallet</Button>
+                </Card>
+              </>
+            }
+          </div>
+
+          {rewardAddress !== undefined && rewardCheckPaymentAddress !== undefined && mainTabValue === 1 && <>
+            <div className="text-white mt-6">
+              <Chip color="primary" label={rewardAddress} variant="outlined" onDelete={() => { setRewardAddress(undefined); setRewardCheckPaymentAddress(undefined) }} />
+            </div>
+          </>}
 
         </section>
         <section className="font-medium text-white text-[22px] mt-6">
