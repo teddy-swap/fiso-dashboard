@@ -501,7 +501,7 @@ function App() {
           <Tabs value={mainTabValue} onChange={(e, v) => setMainTabValue(v)} variant="fullWidth">
             <Tab label="Stats" />
             <Tab label="Rewards" />
-            <Tab label="TeddyBearsClub Whitelist" />
+            <Tab label="TBC WL" />
           </Tabs>
           <div className={`grid grid-cols-1 md:grid-cols-3 font-medium text-white text-[22px] mt-6 md:gap-4 gap-2 ${mainTabValue !== 0 ? "hidden" : "visible"}`}>
             <Card sx={{ backgroundColor: "#294F72", color: "#FFF", height: "200px" }} className="!rounded-lg py-4 px-6">
