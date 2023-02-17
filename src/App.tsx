@@ -4,6 +4,7 @@ import { Pool, QUALIFIED_POOLS, sortedByIdPools as sortPoolsById } from './Pools
 import JSConfetti from 'js-confetti';
 import { Close, ConfirmationNumber, Info, Loop, Wallet, WalletTwoTone } from '@mui/icons-material';
 import { Blockfrost, Lucid } from 'lucid-cardano';
+import { TBC_WHITE_LIST } from './TbcWhitelist';
 
 const jsConfetti = new JSConfetti();
 let isFirstLoad = false;
@@ -500,6 +501,7 @@ function App() {
           <Tabs value={mainTabValue} onChange={(e, v) => setMainTabValue(v)} variant="fullWidth">
             <Tab label="Stats" />
             <Tab label="Rewards" />
+            <Tab label="TeddyBearsClub Whitelist" />
           </Tabs>
           <div className={`grid grid-cols-1 md:grid-cols-3 font-medium text-white text-[22px] mt-6 md:gap-4 gap-2 ${mainTabValue !== 0 ? "hidden" : "visible"}`}>
             <Card sx={{ backgroundColor: "#294F72", color: "#FFF", height: "200px" }} className="!rounded-lg py-4 px-6">
@@ -626,12 +628,40 @@ function App() {
             }
           </div>
 
-          {rewardAddress !== undefined && rewardCheckPaymentAddress !== undefined && mainTabValue === 1 && <>
+          <div className={`grid grid-cols-1 md:grid-cols-3 font-medium text-white text-[22px] mt-6 md:gap-4 gap-2 ${mainTabValue !== 2 ? "hidden" : "visible"}`}>
+            {rewardAddress === undefined &&
+              <Card sx={{ backgroundColor: "#294F72", color: "#FFF", height: "200px" }} className="!rounded-lg py-1 px-6 col-start-1 md:col-start-2">
+                <h4 className="mt-1">Whitelist Check</h4>
+                <div className="mt-1 flex">
+                  <TextField InputProps={{ className: "!text-white" }} className="w-full" id="standard-basic" label="Enter your wallet address" variant="standard" value={rewardCheckPaymentAddress} onChange={(e) => setRewardCheckPaymentAddress(e.target.value)} />
+                </div>
+                <div className="my-2">OR</div>
+                <div className="flex justify-center">
+                  <Button startIcon={<WalletTwoTone />} onClick={onConnectWalletShow}>Connect Wallet</Button>
+                  <a href="https://teddyswap.peppermintnft.io/" target="_blank" rel="noreferrer"><Button startIcon={<>🧸</>}>Mint TBC!</Button></a>
+                </div>
+              </Card>}
+            {rewardAddress !== undefined &&
+              <Card sx={{ backgroundColor: "#294F72", color: "#FFF", height: "200px" }} className="!rounded-lg py-1 px-6 col-start-1 md:col-start-2 grid content-center">
+                {TBC_WHITE_LIST.indexOf(rewardAddress) !== -1 ?
+                  <>
+                    <h4 className="mt-1">You are whitelisted! ✅</h4><div className="flex justify-center">
+                      <a href="https://teddyswap.peppermintnft.io/" target="_blank" rel="noreferrer"><Button startIcon={<>🧸</>}>Mint TBC!</Button></a>
+                    </div>
+                  </> :
+                  <>
+                    <h4 className="mt-1">You are not whitelisted! ❌</h4><div className="flex justify-center">
+                      <a href="https://teddyswap.peppermintnft.io/" target="_blank" rel="noreferrer"><Button startIcon={<>🧸</>}>Mint TBC!</Button></a>
+                    </div>
+                  </>}
+              </Card>}
+          </div>
+
+          {rewardAddress !== undefined && rewardCheckPaymentAddress !== undefined && (mainTabValue === 1 || mainTabValue === 2) && <>
             <div className="text-white mt-6">
               <Chip color="primary" label={rewardAddress} variant="outlined" onDelete={() => { setRewardAddress(undefined); setRewardCheckPaymentAddress(undefined) }} />
             </div>
           </>}
-
         </section>
         <section className="font-medium text-white text-[22px] mt-6">
           <Paper elevation={2} sx={{ backgroundColor: "#294F72", color: "#FFF" }} className="mt-8 !rounded-lg py-4 px-6">
