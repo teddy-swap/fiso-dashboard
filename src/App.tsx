@@ -489,12 +489,17 @@ function App() {
           <div className="flex justify-center lg:justify-start"><img src="teddy-logo.svg" alt="logo" className="w-[200px]" /></div>
           <h1 className="text-[#66A7F2] lg:text-[35px] text-[25px] font-bold">FISO Stake Dashboard</h1>
           <h2 className="text-[#66A7F2] lg:text-[25px] text-[15px] font-bold">Latest Cardano Block: <b className="text-white">{currentBlockHeight}</b></h2>
-          <div className="md:absolute md:right-0 md:top-5 static">
-            {currentWalletApi === undefined && <Button startIcon={<WalletTwoTone />} onClick={onConnectWalletShow}>Connect Wallet</Button>}
-            {currentWalletApi !== undefined && currentAddress !== undefined &&
-              <Chip className="!text-white" avatar={<Avatar src={currentWallet?.icon} />} label={currentAddress?.substring(0, 10) + "..." + currentAddress?.substring(currentAddress?.length - 6)} onClick={() => { setCurrentWalletApi(undefined); setRewardAddress(undefined); setRewardCheckPaymentAddress(undefined); }} />}
-            {currentWalletApi !== undefined && currentAddress === undefined &&
-              <Chip className="!text-white" avatar={<Loop className="animate-spin" />} label={"loading..."} />}
+          <div className="md:absolute md:right-0 md:top-5 static flex justify-center">
+            <div>
+              {currentWalletApi === undefined && <Button onClick={onConnectWalletShow}>Connect Wallet</Button>}
+              {currentWalletApi !== undefined && currentAddress !== undefined &&
+                <Chip className="!text-white" avatar={<Avatar src={currentWallet?.icon} />} label={currentAddress?.substring(0, 10) + "..." + currentAddress?.substring(currentAddress?.length - 6)} onClick={() => { setCurrentWalletApi(undefined); setRewardAddress(undefined); setRewardCheckPaymentAddress(undefined); }} />}
+              {currentWalletApi !== undefined && currentAddress === undefined &&
+                <Chip className="!text-white" avatar={<Loop className="animate-spin" />} label={"loading..."} />}
+            </div>
+            <div>
+              <a href="https://teddyswap.peppermintnft.io/" target="_blank" rel="noreferrer"><Button>Visit Minting Website</Button></a>
+            </div>
           </div>
         </header>
         <section className="">
@@ -637,21 +642,21 @@ function App() {
                 </div>
                 <div className="my-2">OR</div>
                 <div className="flex justify-center">
-                  <Button startIcon={<WalletTwoTone />} onClick={onConnectWalletShow}>Connect Wallet</Button>
-                  <a href="https://teddyswap.peppermintnft.io/" target="_blank" rel="noreferrer"><Button startIcon={<>🧸</>}>Mint TBC!</Button></a>
+                  <Button onClick={onConnectWalletShow}>Connect Wallet</Button>
+                  <a href="https://teddyswap.peppermintnft.io/" target="_blank" rel="noreferrer"><Button>Visit Minting Website</Button></a>
                 </div>
               </Card>}
             {rewardAddress !== undefined &&
               <Card sx={{ backgroundColor: "#294F72", color: "#FFF", height: "200px" }} className="!rounded-lg py-1 px-6 col-start-1 md:col-start-2 grid content-center">
-                {TBC_WHITE_LIST.indexOf(rewardAddress) !== -1 ?
+                {(TBC_WHITE_LIST.indexOf(rewardAddress) !== -1 || TBC_WHITE_LIST.indexOf(currentAddress!)) ?
                   <>
-                    <h4 className="mt-1">You are whitelisted! ✅</h4><div className="flex justify-center">
-                      <a href="https://teddyswap.peppermintnft.io/" target="_blank" rel="noreferrer"><Button startIcon={<>🧸</>}>Mint TBC!</Button></a>
+                    <h4 className="mt-1">You are whitelisted ✅</h4><div className="flex justify-center">
+                      <a href="https://teddyswap.peppermintnft.io/" target="_blank" rel="noreferrer"><Button>Visit Minting Website</Button></a>
                     </div>
                   </> :
                   <>
-                    <h4 className="mt-1">You are not whitelisted! ❌</h4><div className="flex justify-center">
-                      <a href="https://teddyswap.peppermintnft.io/" target="_blank" rel="noreferrer"><Button startIcon={<>🧸</>}>Mint TBC!</Button></a>
+                    <h4 className="mt-1">You are not whitelisted ❌</h4><div className="flex justify-center">
+                      <a href="https://teddyswap.peppermintnft.io/" target="_blank" rel="noreferrer"><Button>Visit Minting Website</Button></a>
                     </div>
                   </>}
               </Card>}
