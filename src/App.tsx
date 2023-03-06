@@ -487,7 +487,7 @@ function App() {
       <main className="container mx-auto relative">
         <header className="pt-4">
           <div className="flex justify-center lg:justify-start"><img src="teddy-logo.svg" alt="logo" className="w-[200px]" /></div>
-          <h1 className="text-[#66A7F2] lg:text-[35px] text-[25px] font-bold">FISO Stake Dashboard</h1>
+          <h1 className="text-[#66A7F2] lg:text-[35px] text-[25px] font-bold text-center">FISO Stake Dashboard</h1>
           <h2 className="text-[#66A7F2] lg:text-[25px] text-[15px] font-bold">Latest Cardano Block: <b className="text-white">{currentBlockHeight}</b></h2>
           <div className="md:absolute md:right-0 md:top-5 static flex justify-center">
             <div>
@@ -503,11 +503,11 @@ function App() {
           </div>
         </header>
         <section className="">
-          <Tabs value={mainTabValue} onChange={(e, v) => setMainTabValue(v)} variant="fullWidth">
-            <Tab label="Stats" />
-            <Tab label="Rewards" />
-            <Tab label="TBC WL" />
-          </Tabs>
+          <div className="hidden">
+            <Tabs value={mainTabValue} onChange={(e, v) => setMainTabValue(v)} variant="fullWidth">
+              <Tab label="Stats" />
+            </Tabs>
+          </div>
           <div className={`grid grid-cols-1 md:grid-cols-3 font-medium text-white text-[22px] mt-6 md:gap-4 gap-2 ${mainTabValue !== 0 ? "hidden" : "visible"}`}>
             <Card sx={{ backgroundColor: "#294F72", color: "#FFF", height: "200px" }} className="!rounded-lg py-4 px-6">
               <CardContent>
@@ -648,7 +648,7 @@ function App() {
               </Card>}
             {rewardAddress !== undefined &&
               <Card sx={{ backgroundColor: "#294F72", color: "#FFF", height: "200px" }} className="!rounded-lg py-1 px-6 col-start-1 md:col-start-2 grid content-center">
-                {(TBC_WHITE_LIST.indexOf(rewardAddress) !== -1 || TBC_WHITE_LIST.indexOf(currentAddress!)) ?
+                {(TBC_WHITE_LIST.indexOf(rewardAddress) !== -1 || TBC_WHITE_LIST.indexOf(currentAddress!) !== -1) ?
                   <>
                     <h4 className="mt-1">You are whitelisted ✅</h4><div className="flex justify-center">
                       <a href="https://teddyswap.peppermintnft.io/" target="_blank" rel="noreferrer"><Button>Visit Minting Website</Button></a>
